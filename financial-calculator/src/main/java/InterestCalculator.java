@@ -24,16 +24,16 @@ public class InterestCalculator {
     }
 
     public double calculateInterestIncome(double principal, int installmentIndex, double totalInterestIncome) {
-        if (installmentIndex > this.installmentNumber) {
+        if (installmentIndex > installmentNumber) {
             return totalInterestIncome;
         }
         double interestThisMonth = principal * interestRateMonthly;
-        double principalNextMonth = principal + interestThisMonth - this.installmentPayment;
+        double principalNextMonth = principal + interestThisMonth - installmentPayment;
         totalInterestIncome += interestThisMonth;
         return calculateInterestIncome(principalNextMonth, installmentIndex + 1, totalInterestIncome);
     }
 
-    public double calculateLoanResult(double principal, int installmentIndex, double totalInterestIncome) {
-        return calculateInterestIncome(principal, installmentIndex, totalInterestIncome) - this.serviceCharge - this.loanAmount * this.loanRate * this.installmentNumber / 12;
+    public double calculateMargin(double principal, int installmentIndex, double totalInterestIncome) {
+        return calculateInterestIncome(principal, installmentIndex, totalInterestIncome) - serviceCharge - loanAmount * loanRate * installmentNumber / 12;
     }
 }
