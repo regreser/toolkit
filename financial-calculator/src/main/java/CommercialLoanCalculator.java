@@ -1,3 +1,5 @@
+import org.jfree.data.category.DefaultCategoryDataset;
+
 public class CommercialLoanCalculator {
     private double loanAmount;
     private double loanRateYearly;
@@ -31,7 +33,7 @@ public class CommercialLoanCalculator {
     }
 
     // 计算还款n月后提前还款的盈亏
-    public double calculateMarginAfterNInstallment(double investAmount, double investRateMonthly, double loanAmount, double loanRateMonthly, int installmentNumber, int repayInstallmentNumber, double serviceChargeRateForRefund, int finalInstallmentNumber, double payTotal, double incomeTotal) {
+    public double calculateMarginAfterNInstallment(DefaultCategoryDataset dataset, double investAmount, double investRateMonthly, double loanAmount, double loanRateMonthly, int installmentNumber, int repayInstallmentNumber, double serviceChargeRateForRefund, int finalInstallmentNumber, double payTotal, double incomeTotal) {
         // 计算月供
         double monthlyInstallmentPayment = calculateMonthlyInstallmentPayment(loanAmount, loanRateMonthly, installmentNumber - repayInstallmentNumber);
         // 计算本月偿还的利息
@@ -42,8 +44,10 @@ public class CommercialLoanCalculator {
         payTotal += monthlyInstallmentPayment;
 
         // 计算投资收益
-        double investIncomeMonthly = calculateInvestIncomeMonthly(investAmount, investRateMonthly);
-
+        double investIncomeMonthly = 0;
+        if (investAmount > 0) {
+            investIncomeMonthly = calculateInvestIncomeMonthly(investAmount, investRateMonthly);
+        }
         incomeTotal += investIncomeMonthly;
 
         investAmount = investAmount + investIncomeMonthly - monthlyInstallmentPayment;
@@ -51,12 +55,16 @@ public class CommercialLoanCalculator {
         repayInstallmentNumber += 1;
 
         printPayAndIncome(repayInstallmentNumber, monthlyInstallmentPayment, investIncomeMonthly, investAmount);
+        if (repayInstallmentNumber % 10 == 0) {
+            dataset.addValue(investAmount - loanAmount, "solution1", String.valueOf(repayInstallmentNumber));
+            dataset.addValue(0, "solution2", String.valueOf(repayInstallmentNumber));
+        }
         // 偿还到"finalInstallmentNumber"指定的期数
         if (repayInstallmentNumber == finalInstallmentNumber) {
             System.out.println("总收入【"+ incomeTotal +"】，月供总支出【"+ payTotal +"】");
             return investAmount - loanAmount - loanAmount * serviceChargeRateForRefund;
         }
-        return calculateMarginAfterNInstallment(investAmount, investRateMonthly, loanAmount, loanRateMonthly, installmentNumber, repayInstallmentNumber, serviceChargeRateForRefund, finalInstallmentNumber, payTotal, incomeTotal);
+        return calculateMarginAfterNInstallment(dataset, investAmount, investRateMonthly, loanAmount, loanRateMonthly, installmentNumber, repayInstallmentNumber, serviceChargeRateForRefund, finalInstallmentNumber, payTotal, incomeTotal);
     }
 
     private void printPayAndIncome(int repayInstallmentNumber, double monthlyInstallmentPayment, double investIncomeMonthly, double investAmount) {
